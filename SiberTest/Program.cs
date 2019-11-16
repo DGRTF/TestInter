@@ -14,7 +14,10 @@ namespace SiberTest
     /// 1.Рандомный элемент и строковое представление объекта не заданы
     /// 2.Рандомный элемент не задан
     /// 3.Строковое представление не задано
-    /// 4.Неверно заданый бинарный текст(Пустой текст или не содержащий пробелы, пустой и т.д..)
+    /// 4.Неверно заданый бинарный текст(Пустой текст или не содержащий пробелы, пустой и т.д. выдаст ошибку)
+    /// 5.Последний и первый элемент связаны между собой(Список замкнут)
+    /// 6.Последний и первый элемент не знают друг о друге 
+    /// 7.В незамкнутом списке неправильно задан родительский элемент(Программа не будет выдавать ошибку и сама найдёт родительский элемент)
     /// </summary>
     class Program
     {
@@ -159,52 +162,100 @@ namespace SiberTest
                 }
             }
 
+
+
+
         }
 
 
 
         public class ListRead
         {
-            public ListRead(ListNode Head)
+            public ListRead()
             {
-                Read(Head);
+
             }
-            public void Read(ListNode Head)
+            public ListRead(ListNode Head, int count)
             {
-                if (Head != null)
+                Read(Head,count);
+            }
+
+
+            public void Read(ListNode Head, int count)
+            {
+                if (count == 0)
                 {
-                    Console.WriteLine("Element:" + Head.Data);
-                    Console.Write("Родительский элемент:");
-                    if (Head.Previous != null)
-                        Console.WriteLine(Head.Previous.Data);
-                    else
+                    return;
+                }
+                else
+                {
+                    
+                    if (Head != null)
                     {
+                        Console.WriteLine("Element:" + Head.Data);
+                        Console.Write("Родительский элемент:");
+                        if (Head.Previous != null)
+                            Console.WriteLine(Head.Previous.Data);
+                        else
+                        {
+                            Console.WriteLine();
+                        }
+
+                        Console.Write("Рандомный элемент:");
+                        if (Head.Random != null)
+                            Console.WriteLine(Head.Random.Data);
+                        else
+                        {
+                            Console.WriteLine();
+                        }
+
+                        Console.Write("Следующий элемент:");
+                        if (Head.Next != null)
+                            Console.WriteLine(Head.Next.Data);
+                        else
+                        {
+                            Console.WriteLine();
+                        }
                         Console.WriteLine();
-                    }
-
-                    Console.Write("Рандомный элемент:");
-                    if (Head.Random != null)
-                        Console.WriteLine(Head.Random.Data);
-                    else
-                    {
                         Console.WriteLine();
+
+                        if (Head.Next != null)
+
+                            Read(Head.Next, count-1);
                     }
-
-                    Console.Write("Следующий элемент:");
-                    if (Head.Next != null)
-                        Console.WriteLine(Head.Next.Data);
-                    else
-                    {
-                        Console.WriteLine();
-                    }
-                    Console.WriteLine();
-                    Console.WriteLine();
-
-                    if (Head.Next != null)
-
-                        Read(Head.Next);
                 }
             }
+
+
+            public bool ListClose (ListNode Head, int count) // возвращает true ,если список замкнут
+            {
+                
+                if (count == 0)
+                {
+                    return true;
+                }
+                else
+                {
+                    if (Head.Previous == null)
+                        return false;
+                    else
+                    {
+                        return ListClose(Head.Previous, count-1);
+                    }
+                }
+            }
+
+
+            public ListNode HeadEl (ListNode Head)  // возвращает родительский элемент из незамкнутого списка
+            {
+                if (Head.Previous == null)
+                    return Head;
+                else
+                    return HeadEl(Head.Previous);
+            }
+
+
+
         }
 
 
@@ -522,14 +573,35 @@ namespace SiberTest
                 StringForm sf = new StringForm();
                 if (Head != null)
                 {
-                    if (Head.Previous == null)
+                    bool l;
+                    //if (Head.Previous == null)
+                    //{
+                    //если список замкнут, то разрываем последний элемент списка с первым
+                    ListRead lr = new ListRead();
+                    if (lr.ListClose(Head, Count))
                     {
+                        l = true;
+                        Console.WriteLine("Список является замкнутым!");
+                        Head.Previous.Next = null;
+                        Head.Previous = null;
+                    }
+                    else // Если список не замкнут, то находим родительский элемент списка(Если случайно задан не родительский)
+                    {
+                        Console.WriteLine("Cписок не замкнут");
+                        l = false;
+                        Head = lr.HeadEl(Head);
+                    }
+                    
                         // преобразуем объекты в бинарную строку с пробелами
                         string bin = sf.AddString(Head);
 
                         // преобразуем бинарный текст с пробелами в бинарную строку
                         BinSpacing bs = new BinSpacing();
                         bin = bs.WithoutSpa(bin);
+                    if (l) // если список замкнут, устанавливаем в битовой строке еденицу первым символом
+                        bin = "1" + bin;
+                    else // в протвном случае - 0
+                        bin = "0" + bin;
 
                         // преобразуем битовый текст в байты
                         byte[] by = new byte[bin.Length];
@@ -550,11 +622,11 @@ namespace SiberTest
                             Console.WriteLine("-------------------------------------------------");
                             Console.WriteLine();
                         }
-                    }
-                    else
-                    {
-                        Console.WriteLine("Неправильно задан родительский элемент списка");
-                    }
+                    //}
+                    //else
+                    //{
+                    //    Console.WriteLine("Неправильно задан родительский элемент списка");
+                    //}
                 }
                 else
                 {
@@ -590,11 +662,16 @@ namespace SiberTest
                                 cha[coun] = Convert.ToChar(i);
                                 coun++;
                             }
+
                             string strbyte = "";
                             foreach (char i in cha) //преобразуем символы в битовый текст
                             {
                                 strbyte += i.ToString();
                             }
+
+                            
+                            string strclose = strbyte.Remove(1); // присваеваем строке первый элемент из битового текста без пробелов
+                            strbyte = strbyte.Substring(1); // удаляем из текста первый элемент
 
                             // преобразуем битовую строку в битовую строку с пробелами
                             BinSpacing bs = new BinSpacing();
@@ -612,6 +689,14 @@ namespace SiberTest
                                 Head = list[0];
                                 Tail = list[list.Count - 1];
                                 Count = list.Count;
+                                if (strclose == "1") // если вначале текста была еденица, то список замкнут.делаем связь между первым и последним элементом
+                                {
+                                    Head.Previous = Tail;
+                                    Tail.Next = Head;
+                                    Console.WriteLine("Список замкнут");
+                                    Console.WriteLine();
+                                }
+                                
                             }
                             else
                             {
@@ -660,6 +745,10 @@ namespace SiberTest
             ln4.Previous = ln3;
             ln4.Next = ln5;
 
+            ln5.Next = ln;
+
+            ln.Previous = ln5;
+
 
 
 
@@ -667,14 +756,14 @@ namespace SiberTest
             {
                 Head = ln,
                 Tail = ln2,
-                Count = 3
+                Count = 6
             };
 
             // выводим список
             Console.WriteLine("Созданный список:");
             Console.WriteLine();
 
-            ListRead listr = new ListRead(lr.Head);
+            ListRead listr = new ListRead(lr.Head,lr.Count);
             // создаем каталог для файла
             string path = @"C:\New";
             DirectoryInfo dirInfo = new DirectoryInfo(path);
@@ -699,7 +788,7 @@ namespace SiberTest
             
             // чтение списка
 
-            ListRead lisR = new ListRead(lr1.Head);
+            ListRead lisR = new ListRead(lr1.Head,lr1.Count);
 
         }
     }
