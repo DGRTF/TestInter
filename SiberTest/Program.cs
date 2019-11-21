@@ -184,45 +184,51 @@ namespace SiberTest
 
             public void Read(ListNode Head, int count)
             {
-                if (count == 0)
+                
+                for(; ; )
                 {
-                    return;
-                }
-                else
-                {
-                    
-                    if (Head != null)
+                    if (count == 0)
                     {
-                        Console.WriteLine("Element:" + Head.Data);
-                        Console.Write("Родительский элемент:");
-                        if (Head.Previous != null)
-                            Console.WriteLine(Head.Previous.Data);
-                        else
+                        return;
+                    }
+                    else
+                    {
+
+                        if (Head != null)
                         {
+                            Console.WriteLine("Element:" + Head.Data);
+                            Console.Write("Родительский элемент:");
+                            if (Head.Previous != null)
+                                Console.WriteLine(Head.Previous.Data);
+                            else
+                            {
+                                Console.WriteLine();
+                            }
+
+                            Console.Write("Рандомный элемент:");
+                            if (Head.Random != null)
+                                Console.WriteLine(Head.Random.Data);
+                            else
+                            {
+                                Console.WriteLine();
+                            }
+
+                            Console.Write("Следующий элемент:");
+                            if (Head.Next != null)
+                                Console.WriteLine(Head.Next.Data);
+                            else
+                            {
+                                Console.WriteLine();
+                            }
                             Console.WriteLine();
-                        }
-
-                        Console.Write("Рандомный элемент:");
-                        if (Head.Random != null)
-                            Console.WriteLine(Head.Random.Data);
-                        else
-                        {
                             Console.WriteLine();
+
+                            if (Head.Next != null)
+                            {
+                                Head = Head.Next;
+                                count--;
+                            }
                         }
-
-                        Console.Write("Следующий элемент:");
-                        if (Head.Next != null)
-                            Console.WriteLine(Head.Next.Data);
-                        else
-                        {
-                            Console.WriteLine();
-                        }
-                        Console.WriteLine();
-                        Console.WriteLine();
-
-                        if (Head.Next != null)
-
-                            Read(Head.Next, count-1);
                     }
                 }
             }
@@ -230,18 +236,21 @@ namespace SiberTest
 
             public bool ListClose (ListNode Head, int count) // возвращает true ,если список замкнут
             {
-                
-                if (count == 0)
+                for (; ; )
                 {
-                    return true;
-                }
-                else
-                {
-                    if (Head.Previous == null)
-                        return false;
+                    if (count == 0)
+                    {
+                        return true;
+                    }
                     else
                     {
-                        return ListClose(Head.Previous, count-1);
+                        if (Head.Previous == null)
+                            return false;
+                        else
+                        {
+                            Head = Head.Previous;
+                            count--;
+                        }
                     }
                 }
             }
@@ -249,10 +258,13 @@ namespace SiberTest
 
             public ListNode HeadEl (ListNode Head)  // возвращает родительский элемент из незамкнутого списка
             {
-                if (Head.Previous == null)
-                    return Head;
-                else
-                    return HeadEl(Head.Previous);
+                for (; ; )
+                {
+                    if (Head.Previous == null)
+                        return Head;
+                    else
+                        Head = Head.Previous;
+                }
             }
 
 
@@ -402,25 +414,28 @@ namespace SiberTest
 
             public string[] DivideText(string s)// делим битовый текст на строки
             {
-                string g = s;
+                //string g = s;
+                string [] outs= new string[0];
                 string[] sub = new string[0];
-                if (s != "")
+                for (; ; )
                 {
-                    if (s.IndexOf("   ") != -1) // если найдено три пробела подряд
+                    if (s != "")
                     {
-                        int i = s.IndexOf("   "); // получаем индекс первого пробела первого вхождения
-                        Array.Resize(ref sub, sub.Length + 1); // увеличиваем размер массива строк на 1
-                        sub[0] = g.Remove(i, g.Length - i); //удаляем начиная с первого пробела изтрех подряд и до конца строки, присваеваем значение индексу массива
-                        g = g.Remove(0, i + 3); // удаляем из строки все символы от нулевого до первго вхождения последнего пробела из 3
-                        sub = sub.Concat(DivideText(g)).ToArray();
-
-                    }
-                    else
-                    {
-                        if (s != " " && s != "  ")
+                        if (s.IndexOf("   ") != -1) // если найдено три пробела подряд
                         {
-                            Array.Resize(ref sub, sub.Length + 1);
-                            sub[0] = s;
+                            int i = s.IndexOf("   "); // получаем индекс первого пробела первого вхождения
+                            Array.Resize(ref sub, sub.Length + 1); // увеличиваем размер массива строк на 1
+                            sub[^1] = s.Remove(i, s.Length - i); //удаляем начиная с первого пробела из трех подряд и до конца строки, присваеваем значение индексу массива
+                            s = s.Remove(0, i + 3); // удаляем из строки все символы от нулевого до первго вхождения последнего пробела из 3 +3 элемента
+                        }
+                        else
+                        {
+                            if (s != " " && s != "  ")
+                            {
+                                Array.Resize(ref sub, sub.Length + 1); // увеличиваем размер массива строк на 1
+                                sub[^1] = s;
+                            }
+                            return sub;
                         }
                     }
                 }
@@ -471,33 +486,43 @@ namespace SiberTest
             public string AddString(ListNode list) // складываем строки
             {
                 string s = "";
-                if (list != null)
+                for (; ; )
                 {
-                    if (list.Data == "" || list.Data == null && list.Random == null) // если задана пустая строка объекта и рандомный элемент не задан
+                    if (list != null)
                     {
-                        s += ToBitString("1");
-                    }
-                    else
-                    {
-                        s = ToBitString(list.Data);
-
-                        if (list.Random != null) // если рандомный элемент задан
+                        if (list.Data == "" || list.Data == null && list.Random == null) // если задана пустая строка объекта и рандомный элемент не задан
                         {
-
-                            // номер текущего объекта в списке отсчитывамый от нуля
-                            string g = Number(list).ToString();
-                            s += "  " + ToBitString(g);
-                            // номер рандомного объекта в списке отсчитывамый от нуля
-                            g = Number(list.Random).ToString();
-                            s += "  " + ToBitString(g);
+                            s += ToBitString("1");
                         }
+                        else
+                        {
+                            s += ToBitString(list.Data);
+
+                            if (list.Random != null) // если рандомный элемент задан
+                            {
+
+                                // номер текущего объекта в списке отсчитывамый от нуля
+                                string g = Number(list).ToString();
+                                s += "  " + ToBitString(g);
+                                // номер рандомного объекта в списке отсчитывамый от нуля
+                                g = Number(list.Random).ToString();
+                                s += "  " + ToBitString(g);
+                            }
 
 
+                        }
+                        if (list.Next != null)
+                        {
+                            s += "   ";
+                            list = list.Next;
+                        }
+                        else
+                        {
+                            return s;
+                        }
                     }
-                    if (list.Next != null)
-                        s += "   " + AddString(list.Next);
                 }
-                return s;
+
             }
 
 
@@ -533,12 +558,17 @@ namespace SiberTest
             int Number(ListNode list) // номер объекта в списке отсчитывамый от нуля
             {
                 int number = 0;
-                if (list.Previous != null)
+                for (; ; )
                 {
-                    number++;
-                    number += Number(list.Previous);
+                    if (list.Previous != null)
+                    {
+                        number++;
+                        list = list.Previous;
+                    }
+                    else
+                        return number;
                 }
-                return number;
+                
             }
         }
 
